@@ -1,7 +1,7 @@
 from http.client import HTTPException
 import json
 
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, Body
 
 
 app = FastAPI()
@@ -10,6 +10,10 @@ def load_data():
     with open("student.json", "r") as f:
         data = json.load(f)
     return data
+
+def save_data(data):
+    with open("student.json", "w") as f:
+        json.dump(data, f)
 
 @app.get("/")
 def hello():
@@ -49,3 +53,15 @@ def viewStudentById(sorted_by: str = Query(..., description="Sort by age, roll, 
     sorted_data = list(data.values())
     sorted_data.sort(key=lambda x: x[sorted_by], reverse=sort_order)
     return sorted_data
+
+
+@app.post("/create")
+def createStudent(student: dict = Body()):
+    data = load_data()
+    
+    student_id = student["id"]
+    data [student_id] = student
+    del data[student_id]["id"]
+    save_data(data)
+    
+    return "Student created successfully."

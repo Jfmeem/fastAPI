@@ -88,5 +88,14 @@
         "math_marks": 82,
         "science_marks": 84,
         "phone": "+1-202-555-0110"
+    },
+    "s015": {
+        "name": "Nafisa Ara",
+        "age": 14,
+        "roll": 45,
+        "english_marks": 96,
+        "math_marks": 85,
+        "science_marks": 81,
+        "phone": "+1-202-555-9720"
     }
 }
