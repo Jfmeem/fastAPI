@@ -2,20 +2,31 @@
 from http.client import HTTPException
 from pydantic import BaseModel, Field
 import json
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi.responses import JSONResponse
 
 from fastapi import FastAPI, Path, Query, Body
 
 class Student(BaseModel):
     id: Annotated[str, Field(..., description="Student id", example="s001")]
-    name: str
+    name: Annotated[str, Field(..., description="Student name", example="Ayesha Rahman")]
     roll: Annotated[int, Field(...,  gt=0, lt=101, description="Student roll number", example=1)]
     age: Annotated[int, Field(...,  gt=0, lt=50, description="Student age", example=20)]
     english_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student English marks", example=80)]
     math_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student Math marks", example=85)]
     science_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student Science marks", example=90)]   
     phn: Annotated[str, Field(..., description="Student phone number", example="+1-202-555-7458")]
+    
+    
+class StudentUpdate(BaseModel):
+    name: Annotated[Optional[str], Field(default=None)]
+    roll: Annotated[Optional[int], Field(default=None)]
+    age: Annotated[Optional[int], Field(default=None)]
+    english_marks: Annotated[Optional[int], Field(default=None)]
+    math_marks: Annotated[Optional[int], Field(default=None)]
+    science_marks: Annotated[Optional[int], Field(default=None)]
+    phn: Annotated[Optional[str], Field(default=None)]
+
 
 app = FastAPI()
 
@@ -78,3 +89,15 @@ def createStudent(student: Student):
     save_data(data)
     
     return JSONResponse(status_code=201, content={"message": "Student created successfully"})
+
+
+@app.put("/update/{student_id}")
+def updateStudent(student_id: str, student: StudentUpdate):
+    data = load_data()
+    
+    if student_id not in data:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    data[student_id].update(student.model_dump(exclude_unset=True))
+    save_data(data)
+    return JSONResponse(status_code=200, content={"message": "Student updated successfully"})
