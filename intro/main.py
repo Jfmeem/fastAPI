@@ -1,8 +1,21 @@
+
 from http.client import HTTPException
+from pydantic import BaseModel, Field
 import json
+from typing import Annotated
+from fastapi.responses import JSONResponse
 
 from fastapi import FastAPI, Path, Query, Body
 
+class Student(BaseModel):
+    id: Annotated[str, Field(..., description="Student id", example="s001")]
+    name: str
+    roll: Annotated[int, Field(...,  gt=0, lt=101, description="Student roll number", example=1)]
+    age: Annotated[int, Field(...,  gt=0, lt=50, description="Student age", example=20)]
+    english_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student English marks", example=80)]
+    math_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student Math marks", example=85)]
+    science_marks: Annotated[int, Field(...,  gt=0, lt=101, description="Student Science marks", example=90)]   
+    phn: Annotated[str, Field(..., description="Student phone number", example="+1-202-555-7458")]
 
 app = FastAPI()
 
@@ -56,12 +69,12 @@ def viewStudentById(sorted_by: str = Query(..., description="Sort by age, roll, 
 
 
 @app.post("/create")
-def createStudent(student: dict = Body()):
+def createStudent(student: Student):
     data = load_data()
     
-    student_id = student["id"]
-    data [student_id] = student
-    del data[student_id]["id"]
+    student_id = student.id
+    data [student_id] = student.model_dump(exclude={"id"})
+
     save_data(data)
     
-    return "Student created successfully."
+    return JSONResponse(status_code=201, content={"message": "Student created successfully"})
