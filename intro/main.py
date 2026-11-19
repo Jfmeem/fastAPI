@@ -91,7 +91,7 @@ def createStudent(student: Student):
     return JSONResponse(status_code=201, content={"message": "Student created successfully"})
 
 
-@app.put("/update/{student_id}")
+@app.put("/edit/{student_id}")
 def updateStudent(student_id: str, student: StudentUpdate):
     data = load_data()
     
@@ -101,3 +101,14 @@ def updateStudent(student_id: str, student: StudentUpdate):
     data[student_id].update(student.model_dump(exclude_unset=True))
     save_data(data)
     return JSONResponse(status_code=200, content={"message": "Student updated successfully"})
+
+@app.delete("/delete/{student_id}")
+def deleteStudent(student_id: str):
+    data = load_data()
+    
+    if student_id not in data:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    del data[student_id]
+    save_data(data)
+    return JSONResponse(status_code=200, content={"message": "Student deleted successfully"})
