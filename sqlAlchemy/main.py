@@ -6,6 +6,7 @@ import models
 from typing import Annotated, Optional
 from models import Todo
 from database import engine, SessionLocal
+from router import auth
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ class updateTodos(BaseModel):
     completed: Optional[bool] = Field(default=None)
 
 models.Base.metadata.create_all(bind=engine)
+app.include_router(auth.router)
 
 def get_db():
     db = SessionLocal()
