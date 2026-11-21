@@ -7,12 +7,15 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
+from jose import jwt
 
 
 router = APIRouter()
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+SECRET_KEY = "2107a98339969148cba5bd15291dd5377d6c1f3f0eda87c78840a8024276123f"
+ALGORITHM = "HS256"
 class CreateUser(BaseModel):
     username : str
     email : str
