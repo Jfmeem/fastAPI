@@ -75,3 +75,16 @@ def update_todos(db: db_dependency, todo_id: int, updated_todo: updateTodos):
     return JSONResponse(status_code=200, content={"message": "To do updated successfully"})
     
      
+     
+@app.delete('/delete/{todo_id}')
+def delete_todo(db: db_dependency, todo_id: int):
+    
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    
+    if todo is None:
+        raise HTTPException(status_code=404, detail="To do not found")
+
+    db.query(Todo).filter(Todo.id == todo_id).delete()
+    db.commit()
+    
+    return JSONResponse(status_code=200, content={"message": "To do deleted successfully"})
