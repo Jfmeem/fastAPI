@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from models import User
+from datetime import timedelta, datetime, timezone
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from database import SessionLocal
@@ -31,9 +32,15 @@ def authenticate_user(username, password, db):
         return False
     
     if bcrypt_context.verify(password, user.hash_password):
-        return True
+        return user
     
     return False
+
+def create_access_token(username: str, user_id: int, expires_date: timedelta):
+    encode ={"sub": username, "id": user_id}
+    expires = datetime.now(timezone.utc) + expires_date
+    encode.update({"exp": expires})
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     
 def get_db():
     db = SessionLocal()
@@ -64,8 +71,8 @@ def create_user(db : db_dependency, new_user: CreateUser):
 @router.post('/login')
 def login_user(db : db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     authenticated = authenticate_user(form_data.username, form_data.password, db)
-    if authenticated == True:
-        return JSONResponse(status_code=200, content={"message": "Login successful"})
-    else:
+    if not authenticated :
         return JSONResponse(status_code=401, content={"message": "Invalid username or password"})
     
+    token = create_access_token(authenticated.username, authenticated.id, timedelta(minutes=30))
+    return token
